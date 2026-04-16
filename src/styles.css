@@ -1,0 +1,45 @@
+.opper-login-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, #8CECF2 0%, #F9B58C 100%);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity 0.15s ease, transform 0.1s ease;
+    box-shadow: 0 2px 8px rgba(140, 236, 242, 0.3);
+}
+.opper-login-button:hover {
+    opacity: 0.9;
+    box-shadow: 0 4px 12px rgba(140, 236, 242, 0.4);
+}
+.opper-login-button:active {
+    transform: scale(0.98);
+}
+.opper-login-button svg {
+    flex-shrink: 0;
+}
+
+/* Dark variant */
+.opper-login-button--dark {
+    background: #111;
+    color: #fff;
+    box-shadow: none;
+}
+.opper-login-button--dark:hover {
+    background: #222;
+    opacity: 1;
+    box-shadow: none;
+}
+.opper-login-button--dark .opper-login-icon-gradient stop:first-child {
+    stop-color: #8CECF2;
+}
+.opper-login-button--dark .opper-login-icon-gradient stop:last-child {
+    stop-color: #F9B58C;
+}

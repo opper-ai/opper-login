@@ -1,0 +1,45 @@
+{
+    "name": "@opperai/login",
+    "version": "0.1.0",
+    "description": "Login with Opper - OAuth SDK for AI inference",
+    "type": "module",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        },
+        "./react": {
+            "import": "./dist/react.js",
+            "types": "./dist/react.d.ts"
+        },
+        "./styles.css": "./dist/styles.css"
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsc && cp src/styles.css dist/styles.css",
+        "dev": "tsc --watch",
+        "prepublishOnly": "npm run build"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/opper-ai/opper-login"
+    },
+    "author": "Opper AI",
+    "license": "MIT",
+    "peerDependencies": {
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "react": {
+            "optional": true
+        }
+    },
+    "devDependencies": {
+        "typescript": "^5.8.0",
+        "@types/react": "^19.0.0"
+    }
+}
