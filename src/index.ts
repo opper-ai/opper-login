@@ -63,7 +63,11 @@ export class OpperLogin {
                 reject(new Error("Failed to open popup"));
                 return;
             }
+            const expectedOrigin = new URL(this.opperUrl).origin;
             const handler = (event: MessageEvent) => {
+                // Verify the message is from the expected origin and our popup
+                if (event.origin !== expectedOrigin) return;
+                if (event.source !== popup) return;
                 if (event.data?.type === "opper_auth_result") {
                     window.removeEventListener("message", handler);
                     if (event.data.error) {

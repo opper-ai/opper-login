@@ -1,6 +1,6 @@
 {
     "name": "@opperai/login",
-    "version": "0.2.4",
+    "version": "0.2.5",
     "description": "Login with Opper - OAuth SDK for AI inference",
     "type": "module",
     "main": "dist/index.js",
