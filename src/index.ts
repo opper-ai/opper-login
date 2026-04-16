@@ -116,7 +116,7 @@ export class OpperLogin {
      * Returns the user code and verification URL. The CLI should display these,
      * then call pollDeviceToken() to wait for the user to approve.
      */
-    async startDeviceAuth(clientSecret: string): Promise<DeviceAuthResponse> {
+    async startDeviceAuth(clientSecret?: string): Promise<DeviceAuthResponse> {
         const body = new URLSearchParams({ client_id: this.clientId });
         const res = await fetch(`${this.opperUrl}/oauth/device`, {
             method: "POST",
@@ -151,8 +151,10 @@ export class OpperLogin {
             const body = new URLSearchParams({
                 device_code: device.deviceCode,
                 client_id: this.clientId,
-                client_secret: device.clientSecret,
             });
+            if (device.clientSecret) {
+                body.set("client_secret", device.clientSecret);
+            }
             const res = await fetch(`${this.opperUrl}/oauth/device/token`, {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -193,5 +195,5 @@ export interface DeviceAuthResponse {
     verificationUri: string;
     expiresIn: number;
     interval: number;
-    clientSecret: string;
+    clientSecret?: string;
 }
