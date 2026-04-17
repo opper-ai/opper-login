@@ -1,5 +1,5 @@
 import { useMemo, useCallback } from "react";
-import { OpperLogin, OpperLoginConfig, AuthResult } from "./index";
+import { OpperLogin, OpperLoginConfig, AuthResult } from "./index.js";
 
 interface LoginWithOpperButtonProps extends OpperLoginConfig {
     onSuccess?: (result: AuthResult) => void;
