@@ -56,7 +56,13 @@ import { OpperLogin } from '@opperai/login'
 const opper = new OpperLogin({ clientId: 'opper_app_...' })
 
 const device = await opper.startDeviceAuth()
-console.log(`Open ${device.verificationUri} and enter code: ${device.userCode}`)
+
+// Prefer verification_uri_complete (RFC 8628 §3.3.1) when the server returns
+// it — the user code is pre-filled, so users only click Approve. Always
+// show userCode too as a fallback (if the browser opens on another device).
+const url = device.verificationUriComplete ?? device.verificationUri
+console.log(`Open ${url}`)
+console.log(`Code: ${device.userCode}`)
 
 const { apiKey, user } = await opper.pollDeviceToken(device)
 ```

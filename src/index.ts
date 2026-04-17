@@ -186,7 +186,7 @@ export class OpperLogin {
      * Poll for device authorization result. Resolves when the user approves or denies.
      */
     async pollDeviceToken(device: DeviceAuthResponse): Promise<AuthResult> {
-        const interval = (device.interval ?? 5) * 1000;
+        let interval = (device.interval ?? 5) * 1000;
         const deadline = Date.now() + (device.expiresIn ?? 600) * 1000;
 
         while (Date.now() < deadline) {
@@ -214,6 +214,11 @@ export class OpperLogin {
             const detail = err.detail ?? err.errors?.[0]?.detail ?? "";
 
             if (detail === "authorization_pending") {
+                continue;
+            }
+            if (detail === "slow_down") {
+                // RFC 8628 §3.5: back off by at least 5 s and keep polling.
+                interval += 5000;
                 continue;
             }
             if (detail === "access_denied") {
