@@ -1,7 +1,8 @@
 import { useMemo, useCallback } from "react";
-import { OpperLogin, OpperLoginConfig, AuthResult } from "./index";
+import { OpperLogin, OpperLoginConfig, AuthResult } from "./index.js";
 
-interface LoginWithOpperButtonProps extends OpperLoginConfig {
+// Exclude clientSecret from browser-side props — it should never touch frontend code.
+interface LoginWithOpperButtonProps extends Omit<OpperLoginConfig, "clientSecret"> {
     onSuccess?: (result: AuthResult) => void;
     onError?: (error: Error) => void;
     mode?: "redirect" | "popup";
