@@ -86,7 +86,7 @@ export function ManageOpperAccount({
             {children ?? (
                 <>
                     <OpperIcon />
-                    <span>Manage Opper Account</span>
+                    <span>Manage Opper Wallet</span>
                 </>
             )}
         </a>
