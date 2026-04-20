@@ -1,23 +1,28 @@
+/*
+ * Default: Opper brand dark blue. Modelled after the "Continue with
+ * Google" pattern — solid brand surface, logo left, text right, clean
+ * rounded rectangle, no shadow.
+ */
 .opper-login-button {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    padding: 12px 24px;
+    gap: 8px;
+    padding: 8px 14px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 500;
     color: #fff;
-    background: linear-gradient(135deg, #8CECF2 0%, #F9B58C 100%);
-    border: none;
-    border-radius: 10px;
+    background: #0F172A;
+    border: 1px solid #0F172A;
+    border-radius: 8px;
     cursor: pointer;
     text-decoration: none;
-    transition: opacity 0.15s ease, transform 0.1s ease;
-    box-shadow: 0 2px 8px rgba(140, 236, 242, 0.3);
+    transition: background-color 0.15s ease, transform 0.1s ease;
+    line-height: 1;
 }
 .opper-login-button:hover {
-    opacity: 0.9;
-    box-shadow: 0 4px 12px rgba(140, 236, 242, 0.4);
+    background: #1E293B;
+    border-color: #1E293B;
 }
 .opper-login-button:active {
     transform: scale(0.98);
@@ -26,20 +31,40 @@
     flex-shrink: 0;
 }
 
-/* Dark variant */
-.opper-login-button--dark {
-    background: #111;
+/*
+ * CSS-only Opper logo for HTML consumers (no inline <svg> needed).
+ * The React component renders an inline <svg>, so we suppress this
+ * fallback when an <svg> child is present to avoid double-rendering.
+ * Modern :has() support is required; older browsers silently drop the
+ * fallback (HTML consumers on legacy browsers just see the text).
+ */
+.opper-login-button:not(:has(svg))::before {
+    content: "";
+    display: inline-block;
+    /* Square box (250×250) with the mark naturally occupying the left
+       portion — gives the icon a slimmer visual footprint while keeping
+       the canonical artwork intact. */
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 250"><path d="M159.78 250C71.53 250 0 194.16 0 125C0 -15.04 159.78 0.52 159.78 0.52C159.78 69.26 88.36 125 0.2 125C149.8 125.11 159.78 250 159.78 250ZM160.52 173.13C160.52 173.13 156.94 128.39 105.04 125.11C120.6 124.97 160.52 120.35 160.52 76.68C160.52 120.35 200.44 124.97 216 125.11C164.1 128.38 160.52 173.13 160.52 173.13Z" fill="%23fff"/></svg>');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
+
+/* Gradient variant — the original light Opper brand look. */
+.opper-login-button--gradient {
+    background: linear-gradient(135deg, #8CECF2 0%, #F9B58C 100%);
+    border: none;
     color: #fff;
-    box-shadow: none;
+    box-shadow: 0 2px 8px rgba(140, 236, 242, 0.3);
 }
-.opper-login-button--dark:hover {
-    background: #222;
-    opacity: 1;
-    box-shadow: none;
+.opper-login-button--gradient:hover {
+    background: linear-gradient(135deg, #8CECF2 0%, #F9B58C 100%);
+    opacity: 0.9;
+    box-shadow: 0 4px 12px rgba(140, 236, 242, 0.4);
 }
-.opper-login-button--dark .opper-login-icon-gradient stop:first-child {
-    stop-color: #8CECF2;
-}
-.opper-login-button--dark .opper-login-icon-gradient stop:last-child {
-    stop-color: #F9B58C;
-}
+
+/* "dark" variant resolves to the same className as the default in JS, so
+   no separate rule is needed here — kept for reference only. */

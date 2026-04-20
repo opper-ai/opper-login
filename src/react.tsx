@@ -6,22 +6,22 @@ interface LoginWithOpperButtonProps extends Omit<OpperLoginConfig, "clientSecret
     onSuccess?: (result: AuthResult) => void;
     onError?: (error: Error) => void;
     mode?: "redirect" | "popup";
-    variant?: "gradient" | "dark";
+    /**
+     * Visual style. Defaults to "default" — the Opper brand dark-blue
+     * button modelled on "Continue with Google". Pass "gradient" for the
+     * original light Opper gradient, or "dark" (kept as an alias of
+     * default for backward compat).
+     */
+    variant?: "default" | "gradient" | "dark";
     children?: React.ReactNode;
 }
 
 function OpperIcon() {
     return (
-        <svg width="22" height="22" viewBox="0 0 250 250" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <linearGradient id="opper-login-grad" x1="40.93%" y1="18.06%" x2="55.32%" y2="86.57%">
-                    <stop stopColor="#8CECF2" offset="0%" />
-                    <stop stopColor="#F9B58C" offset="100%" />
-                </linearGradient>
-            </defs>
+        <svg width="20" height="20" viewBox="0 0 250 250" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
                 d="M159.78 250C71.53 250 0 194.16 0 125C0 -15.04 159.78 0.52 159.78 0.52C159.78 69.26 88.36 125 0.2 125C149.8 125.11 159.78 250 159.78 250ZM160.52 173.13C160.52 173.13 156.94 128.39 105.04 125.11C120.6 124.97 160.52 120.35 160.52 76.68C160.52 120.35 200.44 124.97 216 125.11C164.1 128.38 160.52 173.13 160.52 173.13Z"
-                fill="url(#opper-login-grad)"
+                fill="#fff"
             />
         </svg>
     );
@@ -29,7 +29,7 @@ function OpperIcon() {
 
 export function LoginWithOpperButton({
     clientId, redirectUri, opperUrl,
-    onSuccess, onError, mode = "redirect", variant = "gradient", children,
+    onSuccess, onError, mode = "redirect", variant = "default", children,
 }: LoginWithOpperButtonProps) {
     const handleClick = useCallback(async () => {
         const opper = new OpperLogin({ clientId, redirectUri, opperUrl });
@@ -45,12 +45,16 @@ export function LoginWithOpperButton({
         }
     }, [clientId, redirectUri, opperUrl, mode, onSuccess, onError]);
 
-    const className = variant === "dark"
-        ? "opper-login-button opper-login-button--dark"
-        : "opper-login-button";
-
     return (
-        <button type="button" onClick={handleClick} className={className}>
+        <button
+            type="button"
+            onClick={handleClick}
+            className={opperButtonClass(variant)}
+            // Default label only when consumers don't provide their own
+            // children — custom children (e.g. localized copy) should
+            // remain the authoritative accessible name.
+            aria-label={children ? undefined : "Login with Opper"}
+        >
             {children ?? (
                 <>
                     <OpperIcon />
@@ -63,13 +67,18 @@ export function LoginWithOpperButton({
 
 interface ManageOpperAccountProps {
     platformUrl?: string;
-    variant?: "gradient" | "dark";
+    /**
+     * Visual style. Defaults to "default" — the Opper brand dark-blue
+     * button. Pass "gradient" for the original light Opper gradient, or
+     * "dark" (kept as an alias of default for backward compat).
+     */
+    variant?: "default" | "gradient" | "dark";
     children?: React.ReactNode;
 }
 
 export function ManageOpperAccount({
     platformUrl,
-    variant = "dark",
+    variant = "default",
     children,
 }: ManageOpperAccountProps) {
     const portalUrl = useMemo(
@@ -77,12 +86,14 @@ export function ManageOpperAccount({
         [platformUrl]
     );
 
-    const className = variant === "dark"
-        ? "opper-login-button opper-login-button--dark"
-        : "opper-login-button";
-
     return (
-        <a href={portalUrl} target="_blank" rel="noopener noreferrer" className={className}>
+        <a
+            href={portalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={opperButtonClass(variant)}
+            aria-label={children ? undefined : "Manage Opper Wallet"}
+        >
             {children ?? (
                 <>
                     <OpperIcon />
@@ -91,4 +102,12 @@ export function ManageOpperAccount({
             )}
         </a>
     );
+}
+
+function opperButtonClass(variant: "default" | "gradient" | "dark"): string {
+    if (variant === "gradient") {
+        return "opper-login-button opper-login-button--gradient";
+    }
+    // "default" and "dark" both resolve to the new brand navy button.
+    return "opper-login-button";
 }
