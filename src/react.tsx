@@ -50,7 +50,10 @@ export function LoginWithOpperButton({
             type="button"
             onClick={handleClick}
             className={opperButtonClass(variant)}
-            aria-label="Login with Opper"
+            // Default label only when consumers don't provide their own
+            // children — custom children (e.g. localized copy) should
+            // remain the authoritative accessible name.
+            aria-label={children ? undefined : "Login with Opper"}
         >
             {children ?? (
                 <>
@@ -89,7 +92,7 @@ export function ManageOpperAccount({
             target="_blank"
             rel="noopener noreferrer"
             className={opperButtonClass(variant)}
-            aria-label="Manage Opper Wallet"
+            aria-label={children ? undefined : "Manage Opper Wallet"}
         >
             {children ?? (
                 <>
