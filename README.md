@@ -92,9 +92,12 @@ Both buttons support `variant="gradient"` (default) and `variant="dark"`:
 
 ## Portal URL
 
+Returns the URL to the user's Opper Wallet — where they manage their
+balance, auto-recharge, and connected apps.
+
 ```js
 const opper = new OpperLogin({ clientId: '...' })
-opper.getPortalUrl() // "https://platform.opper.ai/user"
+opper.getPortalUrl() // "https://platform.opper.ai/wallet"
 ```
 
 ## Using the API Key

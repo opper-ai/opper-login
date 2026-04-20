@@ -53,11 +53,13 @@ export class OpperLogin {
     }
 
     /**
-     * Get the URL to the user's Opper account portal.
-     * Link to this so users can manage billing, connected apps, and settings.
+     * Get the URL to the user's Opper Wallet.
+     * Link to this so users can manage balance, connected apps, and
+     * auto-recharge settings. The old `/user` path still redirects here
+     * for backward compatibility.
      */
     getPortalUrl(): string {
-        return `${this.platformUrl}/user`;
+        return `${this.platformUrl}/wallet`;
     }
 
     authorize(state?: string): void {
