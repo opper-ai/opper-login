@@ -60,6 +60,13 @@ export interface DeviceAuthResponse {
     interval: number;
 }
 
+export interface DeviceAuthOptions {
+    /** Request a replacement credential after user approval. */
+    renew?: boolean;
+    /** ID of the credential to revoke after successful renewal, when known. */
+    currentCredentialId?: string;
+}
+
 export class OpperLogin {
     private clientId: string;
     private redirectUri: string;
@@ -185,8 +192,14 @@ export class OpperLogin {
      * Returns the user code and verification URL. The CLI should display these,
      * then call pollDeviceToken() to wait for the user to approve.
      */
-    async startDeviceAuth(): Promise<DeviceAuthResponse> {
+    async startDeviceAuth(options: DeviceAuthOptions = {}): Promise<DeviceAuthResponse> {
         const body = new URLSearchParams({ client_id: this.clientId });
+        if (options.renew) {
+            body.set("renew", "true");
+        }
+        if (options.currentCredentialId !== undefined) {
+            body.set("current_credential_id", options.currentCredentialId);
+        }
         const res = await fetch(`${this.opperUrl}/oauth/device`, {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },

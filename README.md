@@ -67,6 +67,25 @@ console.log(`Code: ${device.userCode}`)
 const { apiKey, user } = await opper.pollDeviceToken(device)
 ```
 
+To renew an existing key, begin another device authorization flow and pass the
+credential ID retained from the previous `AuthResult` when available:
+
+```js
+const device = await opper.startDeviceAuth({
+  renew: true,
+  currentCredentialId: savedCredential.credentialId, // omit if unknown
+})
+// Open device.verificationUriComplete ?? device.verificationUri, then:
+const replacement = await opper.pollDeviceToken(device)
+```
+
+`startDeviceAuth()` sends only `client_id` as before. The options above add
+`renew=true` and, when supplied, `current_credential_id` to the form POST at
+`/oauth/device`. The Opper API decides whether it can revoke the previous key;
+an unknown credential ID should leave that key active. Store the replacement
+`apiKey` and any returned credential metadata together. The SDK does not store
+or replace local credentials itself.
+
 For confidential-client CLIs, pass `clientSecret` in the config and it will be sent automatically.
 
 Both `pollDeviceToken()` and the server-side `exchangeCode()` return the same
@@ -76,8 +95,8 @@ the Opper API supplies them. These fields are optional for compatibility with
 existing responses. Clients should retain them with the key so they can show
 the issuing organization and expiry; the server remains authoritative when a
 key is used. The SDK handles the OAuth transport and does not store credentials
-on disk. Agent-specific renewal and organization expiry settings require the
-corresponding Opper API contract and are not available through this SDK yet.
+on disk. Renewal and organization expiry behavior require the corresponding
+Opper API support.
 
 ## React
 
