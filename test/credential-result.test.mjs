@@ -13,6 +13,9 @@ const issued = {
     user: { email: "dev@example.com", name: "Developer" },
     credential_id: "cred-123",
     org_id: 42,
+    project_id: 7,
+    project_uuid: "2a857a55-d64d-49f7-a4ca-3f8a827fa5bb",
+    project_name: "Agent pilot",
     expires_at: "2026-10-24T12:00:00Z",
 };
 
@@ -31,6 +34,9 @@ test("code exchange returns the shared credential metadata", async () => {
         user: issued.user,
         credentialId: issued.credential_id,
         orgId: issued.org_id,
+        projectId: issued.project_id,
+        projectUuid: issued.project_uuid,
+        projectName: issued.project_name,
         expiresAt: issued.expires_at,
     });
 });
@@ -52,6 +58,9 @@ test("device exchange returns the same metadata", async () => {
         user: issued.user,
         credentialId: issued.credential_id,
         orgId: issued.org_id,
+        projectId: issued.project_id,
+        projectUuid: issued.project_uuid,
+        projectName: issued.project_name,
         expiresAt: issued.expires_at,
     });
 });

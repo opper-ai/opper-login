@@ -90,13 +90,13 @@ For confidential-client CLIs, pass `clientSecret` in the config and it will be s
 
 Both `pollDeviceToken()` and the server-side `exchangeCode()` return the same
 `AuthResult`. Alongside `apiKey` and `user`, the result can contain
-`credentialId`, `orgId`, and `expiresAt` (an absolute ISO 8601 timestamp) when
-the Opper API supplies them. These fields are optional for compatibility with
-existing responses. Clients should retain them with the key so they can show
-the issuing organization and expiry; the server remains authoritative when a
-key is used. The SDK handles the OAuth transport and does not store credentials
-on disk. Renewal and organization expiry behavior require the corresponding
-Opper API support.
+`credentialId`, `orgId`, `projectId`, `projectUuid`, `projectName`, and
+`expiresAt` (an absolute ISO 8601 timestamp) when the Opper API supplies them.
+These fields are optional for compatibility with existing responses. Clients
+should retain them with the key so they can show the issuing organization,
+project, and expiry; the server remains authoritative when a key is used. The
+SDK handles the OAuth transport and does not store credentials on disk. Renewal
+and organization expiry behavior require the corresponding Opper API support.
 
 ## React
 

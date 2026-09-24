@@ -24,6 +24,12 @@ export interface AuthResult {
     credentialId?: string;
     /** Organization that owns the issued credential, when supplied by the server. */
     orgId?: number;
+    /** Project that owns the issued credential, when supplied by the server. */
+    projectId?: number;
+    /** Stable public project identifier, when supplied by the server. */
+    projectUuid?: string;
+    /** Display name of the issuing project, when supplied by the server. */
+    projectName?: string;
     /** Absolute ISO 8601 expiry of the issued credential, when applicable. */
     expiresAt?: string;
 }
@@ -34,6 +40,9 @@ function authResult(data: {
     user: AuthResult["user"];
     credential_id?: unknown;
     org_id?: unknown;
+    project_id?: unknown;
+    project_uuid?: unknown;
+    project_name?: unknown;
     expires_at?: unknown;
 }): AuthResult {
     return {
@@ -41,6 +50,9 @@ function authResult(data: {
         user: data.user,
         ...(typeof data.credential_id === "string" ? { credentialId: data.credential_id } : {}),
         ...(typeof data.org_id === "number" ? { orgId: data.org_id } : {}),
+        ...(typeof data.project_id === "number" ? { projectId: data.project_id } : {}),
+        ...(typeof data.project_uuid === "string" ? { projectUuid: data.project_uuid } : {}),
+        ...(typeof data.project_name === "string" ? { projectName: data.project_name } : {}),
         ...(typeof data.expires_at === "string" ? { expiresAt: data.expires_at } : {}),
     };
 }
