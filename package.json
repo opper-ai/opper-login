@@ -19,6 +19,7 @@
     "scripts": {
         "build": "tshy && node scripts/post-build.mjs",
         "dev": "tshy --watch",
+        "test": "node --test",
         "prepublishOnly": "npm run build"
     },
     "repository": {

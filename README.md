@@ -69,6 +69,16 @@ const { apiKey, user } = await opper.pollDeviceToken(device)
 
 For confidential-client CLIs, pass `clientSecret` in the config and it will be sent automatically.
 
+Both `pollDeviceToken()` and the server-side `exchangeCode()` return the same
+`AuthResult`. Alongside `apiKey` and `user`, the result can contain
+`credentialId`, `orgId`, and `expiresAt` (an absolute ISO 8601 timestamp) when
+the Opper API supplies them. These fields are optional for compatibility with
+existing responses. Clients should retain them with the key so they can show
+the issuing organization and expiry; the server remains authoritative when a
+key is used. The SDK handles the OAuth transport and does not store credentials
+on disk. Agent-specific renewal and organization expiry settings require the
+corresponding Opper API contract and are not available through this SDK yet.
+
 ## React
 
 ```jsx

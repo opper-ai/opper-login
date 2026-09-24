@@ -20,6 +20,29 @@ export interface OpperLoginConfig {
 export interface AuthResult {
     apiKey: string;
     user: { email: string; name: string };
+    /** Opaque identifier of the issued Opper credential, when supplied by the server. */
+    credentialId?: string;
+    /** Organization that owns the issued credential, when supplied by the server. */
+    orgId?: number;
+    /** Absolute ISO 8601 expiry of the issued credential, when applicable. */
+    expiresAt?: string;
+}
+
+/** Keep device and authorization-code exchanges on the same result contract. */
+function authResult(data: {
+    api_key: string;
+    user: AuthResult["user"];
+    credential_id?: unknown;
+    org_id?: unknown;
+    expires_at?: unknown;
+}): AuthResult {
+    return {
+        apiKey: data.api_key,
+        user: data.user,
+        ...(typeof data.credential_id === "string" ? { credentialId: data.credential_id } : {}),
+        ...(typeof data.org_id === "number" ? { orgId: data.org_id } : {}),
+        ...(typeof data.expires_at === "string" ? { expiresAt: data.expires_at } : {}),
+    };
 }
 
 export interface DeviceAuthResponse {
@@ -154,7 +177,7 @@ export class OpperLogin {
             throw new Error(err.detail ?? "Token exchange failed");
         }
         const data = await res.json();
-        return { apiKey: data.api_key, user: data.user };
+        return authResult(data);
     }
 
     /**
@@ -209,7 +232,7 @@ export class OpperLogin {
 
             if (res.ok) {
                 const data = await res.json();
-                return { apiKey: data.api_key, user: data.user };
+                return authResult(data);
             }
 
             const err = await res.json().catch(() => ({}));
