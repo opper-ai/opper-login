@@ -72,12 +72,15 @@ export interface DeviceAuthResponse {
     interval: number;
 }
 
-export interface DeviceAuthOptions {
+export interface RenewalOptions {
     /** Request a replacement credential after user approval. */
     renew?: boolean;
     /** ID of the credential to revoke after successful renewal, when known. */
     currentCredentialId?: string;
 }
+
+/** Kept for callers that use the device-specific options type. */
+export interface DeviceAuthOptions extends RenewalOptions {}
 
 export class OpperLogin {
     private clientId: string;
@@ -104,7 +107,7 @@ export class OpperLogin {
         return `${this.platformUrl}/wallet`;
     }
 
-    authorize(state?: string): void {
+    authorize(state?: string, options: RenewalOptions = {}): void {
         this.requireRedirectUri("authorize");
         const actualState = state ?? this.generateState();
         sessionStorage.setItem("opper_oauth_state", actualState);
@@ -114,10 +117,11 @@ export class OpperLogin {
             response_type: "code",
             state: actualState,
         });
+        this.addRenewalParams(params, options);
         window.location.href = `${this.opperUrl}/oauth/authorize?${params}`;
     }
 
-    authorizePopup(): Promise<AuthResult> {
+    authorizePopup(options: RenewalOptions = {}): Promise<AuthResult> {
         return new Promise((resolve, reject) => {
             this.requireRedirectUri("authorizePopup");
             const state = this.generateState();
@@ -127,6 +131,7 @@ export class OpperLogin {
                 response_type: "code",
                 state,
             });
+            this.addRenewalParams(params, options);
             const popup = window.open(
                 `${this.opperUrl}/oauth/authorize?${params}`,
                 "opper_login",
@@ -206,12 +211,7 @@ export class OpperLogin {
      */
     async startDeviceAuth(options: DeviceAuthOptions = {}): Promise<DeviceAuthResponse> {
         const body = new URLSearchParams({ client_id: this.clientId });
-        if (options.renew) {
-            body.set("renew", "true");
-        }
-        if (options.currentCredentialId !== undefined) {
-            body.set("current_credential_id", options.currentCredentialId);
-        }
+        this.addRenewalParams(body, options);
         const res = await fetch(`${this.opperUrl}/oauth/device`, {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -230,6 +230,15 @@ export class OpperLogin {
             expiresIn: data.expires_in,
             interval: data.interval,
         };
+    }
+
+    private addRenewalParams(params: URLSearchParams, options: RenewalOptions): void {
+        if (options.renew) {
+            params.set("renew", "true");
+        }
+        if (options.currentCredentialId !== undefined) {
+            params.set("current_credential_id", options.currentCredentialId);
+        }
     }
 
     /**

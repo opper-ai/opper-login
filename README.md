@@ -48,6 +48,26 @@ if (result) {
 }
 ```
 
+To renew a credential through the authorization-code flow, pass renewal options
+as the second argument to `authorize` (the first remains the optional OAuth
+state). Popup clients pass the same options to `authorizePopup`:
+
+```js
+const renewal = {
+  renew: true,
+  currentCredentialId: savedCredential.credentialId, // omit if unknown
+}
+
+opper.authorize(undefined, renewal)
+// Or: const replacement = await opper.authorizePopup(renewal)
+```
+
+The SDK adds `renew=true` and, when supplied, `current_credential_id` to the
+`GET /oauth/authorize` query. The authorization server carries this intent
+through browser approval and code exchange. Save the returned replacement key
+and credential metadata together. Existing calls to `authorize(state)` and
+`authorizePopup()` keep their previous request shape.
+
 ## CLI / Device Flow
 
 ```js
@@ -111,6 +131,9 @@ import '@opperai/login/styles.css'
 
 <ManageOpperAccount />
 ```
+
+The React login button also accepts `renew` and `currentCredentialId` for
+either redirect or popup mode. Set its `children` to a suitable renewal label.
 
 Both buttons support `variant="gradient"` (default) and `variant="dark"`:
 

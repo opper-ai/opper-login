@@ -1,8 +1,8 @@
 import { useMemo, useCallback } from "react";
-import { OpperLogin, OpperLoginConfig, AuthResult } from "./index.js";
+import { OpperLogin, OpperLoginConfig, AuthResult, RenewalOptions } from "./index.js";
 
 // Exclude clientSecret from browser-side props — it should never touch frontend code.
-interface LoginWithOpperButtonProps extends Omit<OpperLoginConfig, "clientSecret"> {
+interface LoginWithOpperButtonProps extends Omit<OpperLoginConfig, "clientSecret">, RenewalOptions {
     onSuccess?: (result: AuthResult) => void;
     onError?: (error: Error) => void;
     mode?: "redirect" | "popup";
@@ -30,20 +30,22 @@ function OpperIcon() {
 export function LoginWithOpperButton({
     clientId, redirectUri, opperUrl,
     onSuccess, onError, mode = "redirect", variant = "default", children,
+    renew, currentCredentialId,
 }: LoginWithOpperButtonProps) {
     const handleClick = useCallback(async () => {
         const opper = new OpperLogin({ clientId, redirectUri, opperUrl });
+        const renewal = { renew, currentCredentialId };
         if (mode === "popup") {
             try {
-                const result = await opper.authorizePopup();
+                const result = await opper.authorizePopup(renewal);
                 onSuccess?.(result);
             } catch (err) {
                 onError?.(err as Error);
             }
         } else {
-            opper.authorize();
+            opper.authorize(undefined, renewal);
         }
-    }, [clientId, redirectUri, opperUrl, mode, onSuccess, onError]);
+    }, [clientId, redirectUri, opperUrl, mode, onSuccess, onError, renew, currentCredentialId]);
 
     return (
         <button
