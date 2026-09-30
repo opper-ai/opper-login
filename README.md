@@ -48,6 +48,26 @@ if (result) {
 }
 ```
 
+To renew a credential through the authorization-code flow, pass renewal options
+as the second argument to `authorize` (the first remains the optional OAuth
+state). Popup clients pass the same options to `authorizePopup`:
+
+```js
+const renewal = {
+  renew: true,
+  currentCredentialId: savedCredential.credentialId, // omit if unknown
+}
+
+opper.authorize(undefined, renewal)
+// Or: const replacement = await opper.authorizePopup(renewal)
+```
+
+The SDK adds `renew=true` and, when supplied, `current_credential_id` to the
+`GET /oauth/authorize` query. The authorization server carries this intent
+through browser approval and code exchange. Save the returned replacement key
+and credential metadata together. Existing calls to `authorize(state)` and
+`authorizePopup()` keep their previous request shape.
+
 ## CLI / Device Flow
 
 ```js
@@ -67,7 +87,36 @@ console.log(`Code: ${device.userCode}`)
 const { apiKey, user } = await opper.pollDeviceToken(device)
 ```
 
+To renew an existing key, begin another device authorization flow and pass the
+credential ID retained from the previous `AuthResult` when available:
+
+```js
+const device = await opper.startDeviceAuth({
+  renew: true,
+  currentCredentialId: savedCredential.credentialId, // omit if unknown
+})
+// Open device.verificationUriComplete ?? device.verificationUri, then:
+const replacement = await opper.pollDeviceToken(device)
+```
+
+`startDeviceAuth()` sends only `client_id` as before. The options above add
+`renew=true` and, when supplied, `current_credential_id` to the form POST at
+`/oauth/device`. The Opper API decides whether it can revoke the previous key;
+an unknown credential ID should leave that key active. Store the replacement
+`apiKey` and any returned credential metadata together. The SDK does not store
+or replace local credentials itself.
+
 For confidential-client CLIs, pass `clientSecret` in the config and it will be sent automatically.
+
+Both `pollDeviceToken()` and the server-side `exchangeCode()` return the same
+`AuthResult`. Alongside `apiKey` and `user`, the result can contain
+`credentialId`, `orgId`, `projectId`, `projectUuid`, `projectName`, and
+`expiresAt` (an absolute ISO 8601 timestamp) when the Opper API supplies them.
+These fields are optional for compatibility with existing responses. Clients
+should retain them with the key so they can show the issuing organization,
+project, and expiry; the server remains authoritative when a key is used. The
+SDK handles the OAuth transport and does not store credentials on disk. Renewal
+and organization expiry behavior require the corresponding Opper API support.
 
 ## React
 
@@ -82,6 +131,9 @@ import '@opperai/login/styles.css'
 
 <ManageOpperAccount />
 ```
+
+The React login button also accepts `renew` and `currentCredentialId` for
+either redirect or popup mode. Set its `children` to a suitable renewal label.
 
 Both buttons support `variant="gradient"` (default) and `variant="dark"`:
 

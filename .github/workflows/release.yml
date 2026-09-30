@@ -42,9 +42,9 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Install and build
+      - name: Install, test and build
         if: steps.version.outputs.changed == 'true'
-        run: npm ci && npm run build
+        run: npm ci && npm test && npm run build
 
       - name: Publish
         if: steps.version.outputs.changed == 'true' && github.event.inputs.dry_run != 'true'

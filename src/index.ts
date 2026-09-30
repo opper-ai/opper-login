@@ -20,6 +20,41 @@ export interface OpperLoginConfig {
 export interface AuthResult {
     apiKey: string;
     user: { email: string; name: string };
+    /** Opaque identifier of the issued Opper credential, when supplied by the server. */
+    credentialId?: string;
+    /** Organization that owns the issued credential, when supplied by the server. */
+    orgId?: number;
+    /** Project that owns the issued credential, when supplied by the server. */
+    projectId?: number;
+    /** Stable public project identifier, when supplied by the server. */
+    projectUuid?: string;
+    /** Display name of the issuing project, when supplied by the server. */
+    projectName?: string;
+    /** Absolute ISO 8601 expiry of the issued credential, when applicable. */
+    expiresAt?: string;
+}
+
+/** Keep device and authorization-code exchanges on the same result contract. */
+function authResult(data: {
+    api_key: string;
+    user: AuthResult["user"];
+    credential_id?: unknown;
+    org_id?: unknown;
+    project_id?: unknown;
+    project_uuid?: unknown;
+    project_name?: unknown;
+    expires_at?: unknown;
+}): AuthResult {
+    return {
+        apiKey: data.api_key,
+        user: data.user,
+        ...(typeof data.credential_id === "string" ? { credentialId: data.credential_id } : {}),
+        ...(typeof data.org_id === "number" ? { orgId: data.org_id } : {}),
+        ...(typeof data.project_id === "number" ? { projectId: data.project_id } : {}),
+        ...(typeof data.project_uuid === "string" ? { projectUuid: data.project_uuid } : {}),
+        ...(typeof data.project_name === "string" ? { projectName: data.project_name } : {}),
+        ...(typeof data.expires_at === "string" ? { expiresAt: data.expires_at } : {}),
+    };
 }
 
 export interface DeviceAuthResponse {
@@ -36,6 +71,16 @@ export interface DeviceAuthResponse {
     expiresIn: number;
     interval: number;
 }
+
+export interface RenewalOptions {
+    /** Request a replacement credential after user approval. */
+    renew?: boolean;
+    /** ID of the credential to revoke after successful renewal, when known. */
+    currentCredentialId?: string;
+}
+
+/** Kept for callers that use the device-specific options type. */
+export interface DeviceAuthOptions extends RenewalOptions {}
 
 export class OpperLogin {
     private clientId: string;
@@ -62,7 +107,7 @@ export class OpperLogin {
         return `${this.platformUrl}/wallet`;
     }
 
-    authorize(state?: string): void {
+    authorize(state?: string, options: RenewalOptions = {}): void {
         this.requireRedirectUri("authorize");
         const actualState = state ?? this.generateState();
         sessionStorage.setItem("opper_oauth_state", actualState);
@@ -72,10 +117,11 @@ export class OpperLogin {
             response_type: "code",
             state: actualState,
         });
+        this.addRenewalParams(params, options);
         window.location.href = `${this.opperUrl}/oauth/authorize?${params}`;
     }
 
-    authorizePopup(): Promise<AuthResult> {
+    authorizePopup(options: RenewalOptions = {}): Promise<AuthResult> {
         return new Promise((resolve, reject) => {
             this.requireRedirectUri("authorizePopup");
             const state = this.generateState();
@@ -85,6 +131,7 @@ export class OpperLogin {
                 response_type: "code",
                 state,
             });
+            this.addRenewalParams(params, options);
             const popup = window.open(
                 `${this.opperUrl}/oauth/authorize?${params}`,
                 "opper_login",
@@ -154,7 +201,7 @@ export class OpperLogin {
             throw new Error(err.detail ?? "Token exchange failed");
         }
         const data = await res.json();
-        return { apiKey: data.api_key, user: data.user };
+        return authResult(data);
     }
 
     /**
@@ -162,8 +209,9 @@ export class OpperLogin {
      * Returns the user code and verification URL. The CLI should display these,
      * then call pollDeviceToken() to wait for the user to approve.
      */
-    async startDeviceAuth(): Promise<DeviceAuthResponse> {
+    async startDeviceAuth(options: DeviceAuthOptions = {}): Promise<DeviceAuthResponse> {
         const body = new URLSearchParams({ client_id: this.clientId });
+        this.addRenewalParams(body, options);
         const res = await fetch(`${this.opperUrl}/oauth/device`, {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -182,6 +230,15 @@ export class OpperLogin {
             expiresIn: data.expires_in,
             interval: data.interval,
         };
+    }
+
+    private addRenewalParams(params: URLSearchParams, options: RenewalOptions): void {
+        if (options.renew) {
+            params.set("renew", "true");
+        }
+        if (options.currentCredentialId !== undefined) {
+            params.set("current_credential_id", options.currentCredentialId);
+        }
     }
 
     /**
@@ -209,7 +266,7 @@ export class OpperLogin {
 
             if (res.ok) {
                 const data = await res.json();
-                return { apiKey: data.api_key, user: data.user };
+                return authResult(data);
             }
 
             const err = await res.json().catch(() => ({}));
