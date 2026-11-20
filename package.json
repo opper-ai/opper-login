@@ -26,6 +26,7 @@
         "type": "git",
         "url": "https://github.com/opper-ai/opper-login"
     },
+    "homepage": "https://opper.ai",
     "author": "Opper AI",
     "license": "MIT",
     "peerDependencies": {
